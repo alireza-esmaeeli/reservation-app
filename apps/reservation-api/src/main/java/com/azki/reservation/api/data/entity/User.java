@@ -23,6 +23,7 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private String password;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<Reservation> reservations = new HashSet<>();
 
     public Set<Reservation> getReservations() {

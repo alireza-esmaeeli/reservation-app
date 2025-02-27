@@ -11,6 +11,8 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
@@ -115,5 +117,41 @@ class ReservationTest {
         // then
         var updatedSlot = entityManager.find(AvailableSlot.class, availableSlot.getId());
         assertThat(updatedSlot.isReserved()).isFalse();
+    }
+
+    @Test
+    void create_shouldBeAddedToUserReservations() {
+
+        // given
+        var availableSlots = IntStream.range(0, 5)
+                .mapToObj(i -> Instancio.of(AvailableSlot.class)
+                        .ignore(field(AvailableSlot::getId))
+                        .ignore(field(AvailableSlot::getCreatedAt))
+                        .set(field(AvailableSlot::isReserved), false)
+                        .create())
+                .toList();
+
+        final var user = Instancio.of(User.class)
+                .ignore(field(User::getId))
+                .ignore(field(User::getCreatedAt))
+                .ignore(field("reservations"))
+                .create();
+
+        availableSlots.forEach(entityManager::persist);
+        entityManager.persist(user);
+        entityManager.flush();
+
+        // when
+        var reservations = availableSlots.stream()
+                .map(availableSlot -> new Reservation(availableSlot, user))
+                .toList();
+
+        reservations.forEach(entityManager::persist);
+        entityManager.flush();
+        entityManager.clear();
+
+        // then
+        var persistedUser = entityManager.find(User.class, user.getId());
+        assertThat(persistedUser.getReservations()).containsExactlyInAnyOrderElementsOf(reservations);
     }
 }
