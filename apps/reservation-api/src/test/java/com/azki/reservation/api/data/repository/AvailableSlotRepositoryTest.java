@@ -12,8 +12,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Assign.valueOf;
 import static org.instancio.Select.field;
 
@@ -32,7 +35,8 @@ class AvailableSlotRepositoryTest {
     private TestEntityManager entityManager;
 
     @Test
-    void shouldReturnAllAvailableSlots() {
+    void findFirstNotReserved_shouldReturnCorrectSlot() {
+        // given
         var availableSlots = IntStream.range(0, 5)
                 .mapToObj(i ->
                         Instancio.of(AvailableSlot.class)
@@ -44,12 +48,16 @@ class AvailableSlotRepositoryTest {
                                         .as((LocalDateTime start) -> start.plusHours(1)))
                                 .create()
                 )
-                .toList();
+                .collect(Collectors.toList());
+
         availableSlots.forEach(entityManager::persist);
-        availableSlots.forEach(System.out::println);
         entityManager.flush();
 
-        AvailableSlot availableSlot = sut.findFirstNotReserved().orElseThrow();
-        System.out.println("availableSlot = " + availableSlot);
+        // when
+        var availableSlot = sut.findFirstNotReserved().orElseThrow();
+
+        // then
+        availableSlots.sort(Comparator.comparing(AvailableSlot::getStartTime));
+        assertThat(availableSlot).isEqualTo(availableSlots.get(0));
     }
 }
