@@ -2,6 +2,7 @@ package com.azki.reservation.api.data.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldNameConstants;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(callSuper = true)
 @Getter
+@FieldNameConstants
 public class User extends BaseEntity {
 
     @Column(unique = true, nullable = false)
