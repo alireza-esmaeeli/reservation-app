@@ -1,7 +1,9 @@
 package com.azki.reservation.api.service;
 
+import com.azki.reservation.api.data.entity.Reservation;
+
 public interface ReservationService {
-    void reserveFirstAvailableSlot(String userEmail);
+    Reservation reserveFirstAvailableSlot(String userEmail);
 
     void cancelReservation(Long reservationId);
 }

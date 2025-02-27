@@ -19,7 +19,7 @@ public class DefaultReservationService implements ReservationService {
     private final AvailableSlotRepository availableSlotRepository;
 
     @Override
-    public void reserveFirstAvailableSlot(String userEmail) {
+    public Reservation reserveFirstAvailableSlot(String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(UserNotFoundException::new);
 
@@ -28,6 +28,7 @@ public class DefaultReservationService implements ReservationService {
 
         var reservation = new Reservation(availableSlot, user);
         reservationRepository.save(reservation);
+        return reservation;
     }
 
     @Override
