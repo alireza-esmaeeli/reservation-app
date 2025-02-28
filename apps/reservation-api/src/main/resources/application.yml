@@ -16,3 +16,6 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  sql:
+    init:
+      mode: never
