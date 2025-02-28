@@ -1,4 +1,8 @@
 package com.azki.reservation.api.dto;
 
-public record ReservationCreateDTO(String userEmail) {
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record ReservationCreateDTO(String email) {
 }
