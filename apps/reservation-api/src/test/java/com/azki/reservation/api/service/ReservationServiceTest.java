@@ -7,6 +7,8 @@ import com.azki.reservation.api.data.repository.AvailableSlotRepository;
 import com.azki.reservation.api.data.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,6 +49,13 @@ class ReservationServiceTest {
     private UserRepository userRepository;
     @Autowired
     private AvailableSlotRepository availableSlotRepository;
+
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(8);
+
+    @AfterAll
+    static void tearDown() {
+        executorService.shutdown();
+    }
 
     @Test
     void reserveFirstAvailableSlot_whenSameNumberOfSlotsAndUsers_reservesAllSlots()
@@ -100,16 +109,74 @@ class ReservationServiceTest {
                         })
                         .collect(Collectors.toList());
 
-        ExecutorService executorService = Executors.newFixedThreadPool(8);
         executorService.invokeAll(tasks);
 
         countDownLatch.await();
-        executorService.shutdown();
 
         List<AvailableSlot> reservedSlots = reservations.stream()
                 .map(Reservation::getAvailableSlot)
                 .toList();
 
+
+        assertThat(reservedSlots).hasSameElementsAs(availableSlots);
+    }
+
+    @Test
+    void reserveFirstAvailableSlot_whenSameUserTryForAllSlots_reservesAllSlots()
+            throws InterruptedException {
+
+        var now = LocalDateTime.now();
+
+        var availableSlots = IntStream.range(0, 8)
+                .mapToObj(i ->
+                        Instancio.of(AvailableSlot.class)
+                                .ignore(field(User::getId))
+                                .ignore(field(User::getCreatedAt))
+                                .set(field(AvailableSlot::isReserved), false)
+                                .generate(field(AvailableSlot::getStartTime),
+                                        gen -> gen.temporal().localDateTime().range(now, now.plusHours(8)))
+                                .assign(valueOf(AvailableSlot::getStartTime)
+                                        .to(field(AvailableSlot::getEndTime))
+                                        .as((LocalDateTime start) -> start.plusHours(1)))
+                                .create()
+                )
+                .collect(Collectors.toList());
+
+        var user = Instancio.of(User.class)
+                .ignore(field(User::getId))
+                .ignore(field(User::getCreatedAt))
+                .ignore(field("reservations"))
+                .generate(field(User::getEmail), gen -> gen.net().email())
+                .create();
+
+        availableSlotRepository.saveAllAndFlush(availableSlots);
+        userRepository.saveAndFlush(user);
+
+        List<Reservation> reservations = new ArrayList<>();
+        var countDownLatch = new CountDownLatch(8);
+
+        List<Callable<Reservation>> tasks =
+                IntStream.range(0, 8)
+                        .mapToObj(i -> (Callable<Reservation>) () -> {
+                            log.info("Starting reservation for user {}", user.getId());
+                            try {
+                                Reservation reservation = sut.reserveFirstAvailableSlot(user.getEmail());
+                                reservations.add(reservation);
+                                return reservation;
+                            } finally {
+                                countDownLatch.countDown();
+                            }
+                        })
+                        .collect(Collectors.toList());
+
+
+        executorService.invokeAll(tasks);
+
+        countDownLatch.await();
+
+        List<AvailableSlot> reservedSlots = reservations.stream()
+                .map(Reservation::getAvailableSlot)
+                .toList();
 
         assertThat(reservedSlots).hasSameElementsAs(availableSlots);
     }

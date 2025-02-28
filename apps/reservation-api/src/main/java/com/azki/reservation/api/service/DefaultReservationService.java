@@ -24,20 +24,23 @@ public class DefaultReservationService implements ReservationService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
-    public synchronized Reservation reserveFirstAvailableSlot(String userEmail) {
+    public Reservation reserveFirstAvailableSlot(String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(UserNotFoundException::new);
         log.debug("Found user {}", user.getId());
 
-        var availableSlot = availableSlotRepository.findFirstNotReserved()
-                .orElseThrow(AvailableSlotNotFoundException::new);
-        log.debug("Found available slot {}", availableSlot.getId());
+        Reservation reservation;
+        synchronized (this) {
+            var availableSlot = availableSlotRepository.findFirstNotReserved()
+                    .orElseThrow(AvailableSlotNotFoundException::new);
+            log.debug("Found available slot {}", availableSlot.getId());
 
-        var reservation = new Reservation(availableSlot, user);
-        log.debug("Created reservation of available slot {} for user {}", availableSlot.getId(), user.getId());
+            reservation = new Reservation(availableSlot, user);
+            log.debug("Created reservation of available slot {} for user {}", availableSlot.getId(), user.getId());
 
-        reservationRepository.saveAndFlush(reservation);
-        log.debug("Saved reservation {}", reservation.getId());
+            reservationRepository.saveAndFlush(reservation);
+            log.debug("Saved reservation {}", reservation.getId());
+        }
 
         return reservation;
     }
