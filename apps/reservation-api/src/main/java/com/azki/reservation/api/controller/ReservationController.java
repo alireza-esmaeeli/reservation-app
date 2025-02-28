@@ -4,6 +4,7 @@ import com.azki.reservation.api.dto.ReservationCreateDTO;
 import com.azki.reservation.api.dto.ReservationReadDTO;
 import com.azki.reservation.api.service.ReservationService;
 import com.azki.reservation.api.util.ReservationMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class ReservationController {
 
     @PostMapping(produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationReadDTO create(@RequestBody ReservationCreateDTO createDTO) {
+    public ReservationReadDTO create(@Valid @RequestBody ReservationCreateDTO createDTO) {
         var reservation = reservationService.reserveFirstAvailableSlot(createDTO.email());
         return MAPPER.mapToReadDTO(reservation);
     }
