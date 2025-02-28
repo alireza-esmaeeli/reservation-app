@@ -7,12 +7,12 @@ spring:
       ddl-auto: none
     show-sql: false
   datasource:
-    url: jdbc:mysql://localhost:3306/reservation_schema
-    username: reservation-app
-    password: password
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   flyway:
     enabled: true
     baseline-on-migrate: true
-    url: jdbc:mysql://localhost:3306/reservation_schema
-    user: reservation-app
-    password: password
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
