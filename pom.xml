@@ -16,6 +16,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <image>azki/${project.artifactId}:${project.version}</image>
     </properties>
 
     <parent>
@@ -23,5 +24,22 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.3</version>
     </parent>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>3.4.4</version>
+                    <configuration>
+                        <from>
+                            <image>eclipse-temurin:21-jre-alpine</image>
+                        </from>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
