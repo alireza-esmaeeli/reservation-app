@@ -5,3 +5,11 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+
+logging:
+  level:
+    com:
+      azki:
+        reservation:
+          api:
+            service: debug
