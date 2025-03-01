@@ -5,37 +5,61 @@ import com.azki.reservation.api.data.repository.UserRepository;
 import com.azki.reservation.api.data.spec.UserSpecs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class UserRepositoryUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    private static final List<GrantedAuthority> ROLE_USER = Collections
+            .unmodifiableList(AuthorityUtils.createAuthorityList("USER"));
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findOne(UserSpecs.hasUsername(username))
-                .map(BridgeUser::new)
+                .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
-    private static class BridgeUser extends User implements UserDetails {
+    private static class CustomUserDetails extends User implements UserDetails {
 
-        public BridgeUser(User user) {
+        public CustomUserDetails(User user) {
             super(user);
         }
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of(new SimpleGrantedAuthority("USER"));
+            return ROLE_USER;
+        }
+
+        @Override
+        public boolean isAccountNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isAccountNonLocked() {
+            return true;
+        }
+
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
         }
     }
 }
