@@ -28,6 +28,13 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private Set<Reservation> reservations = new HashSet<>();
 
+    public User(User user) {
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.reservations = user.getReservations();
+    }
+
     public Set<Reservation> getReservations() {
         return Collections.unmodifiableSet(reservations);
     }
