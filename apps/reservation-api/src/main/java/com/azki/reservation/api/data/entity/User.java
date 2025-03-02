@@ -29,6 +29,7 @@ public class User extends BaseEntity {
     private Set<Reservation> reservations = new HashSet<>();
 
     public User(User user) {
+        super(user.getId(), user.getCreatedAt());
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.password = user.getPassword();
