@@ -35,7 +35,7 @@ public class DefaultReservationService implements ReservationService {
 
         Lock lock = lockRegistry.obtain("available-slots");
         lock.lock();
-        log.debug("Acquired lock");
+        log.debug("Acquired lock {}", lock);
 
         var availableSlot = availableSlotRepository.findFirstNotReserved()
                 .orElseThrow(AvailableSlotNotFoundException::new);
