@@ -5,6 +5,7 @@ import com.azki.reservation.api.data.entity.Reservation;
 import com.azki.reservation.api.data.entity.User;
 import com.azki.reservation.api.data.repository.AvailableSlotRepository;
 import com.azki.reservation.api.data.repository.UserRepository;
+import com.redis.testcontainers.RedisContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.AfterAll;
@@ -41,6 +42,11 @@ class ReservationServiceTest {
     @ServiceConnection
     static MySQLContainer<?> mysqlContainer =
             new MySQLContainer<>("mysql:lts");
+
+    @Container
+    @ServiceConnection
+    static RedisContainer redisContainer =
+            new RedisContainer("redis:7.4.2-alpine");
 
     @Autowired
     private ReservationService sut;
