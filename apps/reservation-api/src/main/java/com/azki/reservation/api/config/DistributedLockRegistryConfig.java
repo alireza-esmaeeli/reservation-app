@@ -8,6 +8,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 
+import static org.springframework.integration.redis.util.RedisLockRegistry.RedisLockType.*;
+
 @Configuration
 public class DistributedLockRegistryConfig {
 
@@ -16,7 +18,9 @@ public class DistributedLockRegistryConfig {
 
     @Bean
     @Primary
-    LockRegistry redisLockRegistry(RedisConnectionFactory redisConnectionFactory) {
-        return new RedisLockRegistry(redisConnectionFactory, applicationName);
+    LockRegistry redisLockRegistry(RedisConnectionFactory connectionFactory) {
+        var lockRegistry = new RedisLockRegistry(connectionFactory, applicationName);
+        lockRegistry.setRedisLockType(PUB_SUB_LOCK);
+        return lockRegistry;
     }
 }
