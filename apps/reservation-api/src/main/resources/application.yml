@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: reservation-api
   jpa:
     hibernate:
       ddl-auto: none
@@ -19,3 +21,7 @@ spring:
   sql:
     init:
       mode: never
+  data:
+    redis:
+      repositories:
+        enabled: false

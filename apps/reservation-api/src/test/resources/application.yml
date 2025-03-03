@@ -5,6 +5,10 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
 
 logging:
   level:
